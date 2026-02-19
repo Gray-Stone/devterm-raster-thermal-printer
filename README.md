@@ -8,6 +8,7 @@ Current default behavior in this repo:
 
 - forced single-line raster blocks (`y = 1`)
 - no in-page whitespace skipping/compression
+- no per-line pacing delay (`RASTER_LINE_DELAY_US = 0`)
 - stable queue defaults applied on install:
   - `FeedWhere=None`
   - `BlankSpace=True`

@@ -6,9 +6,18 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #ifndef DEBUGFILE
 #define DEBUGFILE "/tmp/debugraster.txt"
+#endif
+
+/*
+ * Row pacing for thermal head / transport stability.
+ * Tuned for forced single-line raster mode.
+ */
+#ifndef RASTER_LINE_DELAY_US
+#define RASTER_LINE_DELAY_US 0
 #endif
 
 static inline int min(int a, int b) {
@@ -324,6 +333,8 @@ static inline void send_raster(const unsigned char *pBuf, int width8,
    * Keep transport behavior uniform by not emitting an extra ESC J flush
    * after each raster block.
    */
+  if (RASTER_LINE_DELAY_US > 0)
+    usleep(RASTER_LINE_DELAY_US);
 
 }
 
