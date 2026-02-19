@@ -110,14 +110,14 @@
 *CloseUI: *FeedDist
 *OpenUI *FeedWhere/When to feed: PickOne
 *OrderDependency: 10 AnySetup *FeedWhere
-*DefaultFeedWhere: AfterJob
+*DefaultFeedWhere: None
 *FeedWhere None/Never: ""
 *FeedWhere AfterPage/After each page: "<</AdvanceMedia 4>>setpagedevice"
 *FeedWhere AfterJob/After whole printing: "<</AdvanceMedia 2>>setpagedevice"
 *CloseUI: *FeedWhere
 *OpenUI *BlankSpace/Blank space at page's end: Boolean
 *OrderDependency: 10 AnySetup *BlankSpace
-*DefaultBlankSpace: False
+*DefaultBlankSpace: True
 *BlankSpace True/Print: "<</cupsInteger6 1>>setpagedevice"
 *BlankSpace False/None: "<</cupsInteger6 0>>setpagedevice"
 *CloseUI: *BlankSpace

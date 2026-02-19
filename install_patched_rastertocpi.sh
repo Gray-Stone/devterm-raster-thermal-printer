@@ -60,4 +60,10 @@ sudo install -m 0644 -o root -g lp "${PPD_SRC}" "${PPD_DST}"
 echo "Restarting CUPS..."
 sudo systemctl restart cups
 
+echo "Applying queue defaults for stable spacing..."
+lpoptions -p devterm_printer -o FeedWhere=None -o BlankSpace=True || true
+if command -v lpadmin >/dev/null 2>&1; then
+  sudo lpadmin -p devterm_printer -o FeedWhere=None -o BlankSpace=True
+fi
+
 echo "Done. Backups: ${BACKUP_DIR}/${STAMP}"

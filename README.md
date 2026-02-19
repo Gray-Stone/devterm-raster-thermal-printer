@@ -4,6 +4,14 @@ Minimal standalone repo for the DevTerm thermal printer CUPS driver.
 
 This repo starts from ClockworkPi's driver files and is intended to evolve via commits for fixes.
 
+Current default behavior in this repo:
+
+- forced single-line raster blocks (`y = 1`)
+- no in-page whitespace skipping/compression
+- stable queue defaults applied on install:
+  - `FeedWhere=None`
+  - `BlankSpace=True`
+
 ## Base Files
 
 - `rastertocpi.c`

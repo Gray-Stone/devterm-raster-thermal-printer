@@ -320,7 +320,10 @@ static inline void send_raster(const unsigned char *pBuf, int width8,
   sendRasterHeader(width8, height);
 
   outputarray((char *)pBuf, width8 * height);
-  flushBuffer();
+  /*
+   * Keep transport behavior uniform by not emitting an extra ESC J flush
+   * after each raster block.
+   */
 
 }
 
@@ -409,7 +412,6 @@ int main(int argc, char *argv[]) {
         tHeader.cupsWidth, tHeader.cupsBytesPerLine, foo, width_bytes );
 
     int iRowsToPrint = tHeader.cupsHeight;
-    int zeroy = 0;
 
     // loop over one page, top to bottom by blocks of most 24 scan lines
     while (iRowsToPrint) {
@@ -417,7 +419,8 @@ int main(int argc, char *argv[]) {
               iCurrentPage,
               (100 * (tHeader.cupsHeight - iRowsToPrint) / tHeader.cupsHeight));
 
-      int iBlockHeight = min(iRowsToPrint, 24);
+      /* Force single-line raster writes for the most stable vertical advance. */
+      int iBlockHeight = 1;
 
       DEBUGPRINT("--------Processing block of %d, starting from %d lines",
                  iBlockHeight, tHeader.cupsHeight - iRowsToPrint);
@@ -452,39 +455,9 @@ int main(int argc, char *argv[]) {
         iBytesChunk = width_bytes * iBlockHeight;
       }
 
-      // lazy output of current raster. First check current line if it is zero.
-      // if there were many zeroes and met non-zero - flush zeros by 'feed' cmd
-      // if opposite - send non-zero chunk as raster.
-      unsigned char *pBuf = pRasterBuf;
-      unsigned char *pChunk = pBuf;
-      const unsigned char *pEnd = pBuf + iBytesChunk;
-      int nonzerolines = 0;
-      while ( pBuf<pEnd ) {
-        if (line_is_empty(pBuf, width_bytes)) {
-          if (nonzerolines) { // met zero, need to flush collected raster
-            send_raster(pChunk, width_bytes, nonzerolines);
-            nonzerolines = 0;
-          }
-          ++zeroy;
-        } else {
-          if (zeroy) { // met non-zero, need to feed calculated num of zero lines
-            flushManyLines(zeroy);
-            zeroy=0;
-          }
-          if (!nonzerolines)
-            pChunk = pBuf;
-          ++nonzerolines;
-        }
-        pBuf += width_bytes;
-      }
-      send_raster(pChunk, width_bytes, nonzerolines);
-      //flushBuffer();
+      /* No in-page white-space skipping: always send raster row data. */
+      send_raster(pRasterBuf, width_bytes, iBlockHeight);
     } // loop over page
-
-    // page is finished.
-    // m.b. we have to print empty tail at the end
-    if (settings.InsertSheet)
-      flushManyLines (zeroy);
 
     if (settings.AdvanceMedia == CUPS_ADVANCE_PAGE)
       flushManyLines(settings.AdvanceDistance);
