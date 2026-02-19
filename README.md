@@ -1,25 +1,28 @@
 # devterm-raster-thermal-printer
 
-Minimal standalone repo for the DevTerm thermal CUPS raster driver files.
+Minimal standalone repo for the DevTerm thermal printer CUPS driver.
 
-## Source Base
+This repo starts from ClockworkPi's driver files and is intended to evolve via commits for fixes.
 
-Copied from ClockworkPi DevTerm upstream:
+## Base Files
 
-- `Code/devterm_thermal_printer_cups/rastertocpi.c`
-- `Code/devterm_thermal_printer_cups/cpi58.ppd`
-- `Code/devterm_thermal_printer_cups/Makefile`
-- `Code/devterm_thermal_printer_cups/README.md`
+- `rastertocpi.c`
+- `cpi58.ppd`
+- `Makefile`
+- `README.devterm.upstream.md` (copied upstream README)
+- `install_patched_rastertocpi.sh`
 
-Upstream references:
+## Upstream Origin
+
+ClockworkPi DevTerm:
 
 - https://raw.githubusercontent.com/clockworkpi/DevTerm/main/Code/devterm_thermal_printer_cups/rastertocpi.c
 - https://raw.githubusercontent.com/clockworkpi/DevTerm/main/Code/devterm_thermal_printer_cups/cpi58.ppd
 
-## Layout
+Reference SHA snapshots used for initial import:
 
-- `upstream/` - original DevTerm driver source files
-- `install_patched_rastertocpi.sh` - local build/install helper
+- `rastertocpi.c`: `f6126fdbc340cc42cd6f4a62052c86fb4bf3c4f1`
+- `cpi58.ppd`: `1af02c4acdf2cd72ec8a544953a53c403681c77f`
 
 ## Build + Install
 

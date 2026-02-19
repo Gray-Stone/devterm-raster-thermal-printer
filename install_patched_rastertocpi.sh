@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SRC_DIR="${SCRIPT_DIR}/upstream"
+SRC_DIR="${SCRIPT_DIR}"
 BUILD_BIN="${SRC_DIR}/rastertocpi"
 
 FILTER_DST="/usr/lib/cups/filter/rastertocpi"
@@ -35,7 +35,7 @@ if [[ ! -f "${PPD_SRC}" ]]; then
   exit 1
 fi
 
-echo "Building rastertocpi from upstream source..."
+echo "Building rastertocpi..."
 (
   cd "${SRC_DIR}"
   gcc rastertocpi.c -o rastertocpi -I /usr/include \
