@@ -6,6 +6,8 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <string.h>
+#include <strings.h>
 #include <unistd.h>
 
 #ifndef DEBUGFILE
@@ -29,6 +31,7 @@ static inline int min(int a, int b) {
 // settings and their stuff
 struct settings_ {
   int modelNum; // the only setting we get from PPD.
+  int trimMode; // 0=off, 1=strong vertical trim
   cups_bool_t InsertSheet;
   cups_adv_t AdvanceMedia;
   cups_cut_t CutMedia;
@@ -38,9 +41,26 @@ struct settings_ settings;
 
 static void initializeSettings(char *commandLineOptionSettings, struct settings_ *pSettings) {
   ppd_file_t *pPpd = ppdOpenFile(getenv("PPD"));
+  cups_option_t *opts = NULL;
+  int num_opts = 0;
+  const char *trim_mode = NULL;
   // char* sDestination = getenv("DestinationPrinterID");
   memset(pSettings, 0, sizeof(struct settings_));
+  pSettings->trimMode = 1;
   pSettings->modelNum = pPpd->model_number;
+
+  if (commandLineOptionSettings) {
+    num_opts = cupsParseOptions(commandLineOptionSettings, 0, &opts);
+    trim_mode = cupsGetOption("TrimMode", num_opts, opts);
+    if (trim_mode &&
+        (!strcasecmp(trim_mode, "Off") || !strcasecmp(trim_mode, "False") ||
+         !strcasecmp(trim_mode, "None"))) {
+      pSettings->trimMode = 0;
+    }
+  }
+
+  if (opts)
+    cupsFreeOptions(num_opts, opts);
   ppdClose(pPpd);
 }
 
@@ -313,11 +333,20 @@ static inline unsigned compress_buffer(unsigned char *pBuf, unsigned iSize,
 }
 
 // returns -1 if whole line iz filled by zeros. Otherwise 0.
-static inline int line_is_empty(const unsigned char *pBuf, unsigned iSize) {
+static inline int line_is_empty(const unsigned char *pBuf, unsigned iSize,
+                                unsigned char *white_byte_out) {
   int i;
+  unsigned char b;
+  if (!iSize)
+    return -1;
+  b = pBuf[0];
+  if (!(b == 0x00 || b == 0xFF))
+    return 0;
   for (i = 0; i < iSize; ++i)
-    if (pBuf[i])
+    if (pBuf[i] != b)
       return 0;
+  if (white_byte_out)
+    *white_byte_out = b;
   return -1;
 }
 
@@ -424,6 +453,13 @@ int main(int argc, char *argv[]) {
         tHeader.cupsWidth, tHeader.cupsBytesPerLine, foo, width_bytes );
 
     int iRowsToPrint = tHeader.cupsHeight;
+    int seen_nonempty_row = 0;
+    int deferred_blank_rows = 0;
+    unsigned char white_byte = 0x00;
+    unsigned char *pZeroRow = (unsigned char *)malloc(width_bytes);
+    if (!pZeroRow)
+      EXITPRINT(EXIT_FAILURE)
+    memset(pZeroRow, white_byte, width_bytes);
 
     // loop over one page, top to bottom by blocks of most 24 scan lines
     while (iRowsToPrint) {
@@ -467,9 +503,33 @@ int main(int argc, char *argv[]) {
         iBytesChunk = width_bytes * iBlockHeight;
       }
 
-      /* No in-page white-space skipping: always send raster row data. */
+      if (settings.trimMode &&
+          line_is_empty(pRasterBuf, width_bytes * iBlockHeight, &white_byte)) {
+        memset(pZeroRow, white_byte, width_bytes);
+        if (!seen_nonempty_row) {
+          /* Trim leading blank rows. */
+          continue;
+        }
+        /* Hold internal/trailing blanks until we know what follows. */
+        deferred_blank_rows += iBlockHeight;
+        continue;
+      }
+
+      if (deferred_blank_rows > 0) {
+        /*
+         * Preserve blank rows inside content, but keep trailing blanks trimmed
+         * by only flushing deferred rows when later non-empty rows exist.
+         */
+        while (deferred_blank_rows-- > 0)
+          send_raster(pZeroRow, width_bytes, 1);
+        deferred_blank_rows = 0;
+      }
+
+      seen_nonempty_row = 1;
       send_raster(pRasterBuf, width_bytes, iBlockHeight);
     } // loop over page
+
+    free(pZeroRow);
 
     if (settings.AdvanceMedia == CUPS_ADVANCE_PAGE)
       flushManyLines(settings.AdvanceDistance);

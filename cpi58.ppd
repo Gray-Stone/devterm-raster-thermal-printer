@@ -32,38 +32,38 @@
 *OpenUI *PageSize/Media Size: PickOne
 *OrderDependency: 10 AnySetup *PageSize
 *DefaultPageSize: X48MMY65MM
-*PageSize X48MMY65MM/58mm x 65mm: "<</PageSize[164 182]>>setpagedevice"
-*PageSize X48MMY105MM/58mm x 105mm: "<</PageSize[164 298]>>setpagedevice"
-*PageSize X48MMY210MM/58mm x 210mm: "<</PageSize[164 595]>>setpagedevice"
-*PageSize X48MMY297MM/58mm x 297mm: "<</PageSize[164 842]>>setpagedevice"
-*PageSize X48MMY3276MM/58mm x 3276mm: "<</PageSize[164 9286]>>setpagedevice"
+*PageSize X48MMY65MM/48mm x 65mm: "<</PageSize[136 182]>>setpagedevice"
+*PageSize X48MMY105MM/48mm x 105mm: "<</PageSize[136 298]>>setpagedevice"
+*PageSize X48MMY210MM/48mm x 210mm: "<</PageSize[136 595]>>setpagedevice"
+*PageSize X48MMY297MM/48mm x 297mm: "<</PageSize[136 842]>>setpagedevice"
+*PageSize X48MMY3276MM/48mm x 3276mm: "<</PageSize[136 9286]>>setpagedevice"
 *CloseUI: *PageSize
 *OpenUI *PageRegion/Media Size: PickOne
 *OrderDependency: 10 AnySetup *PageRegion
 *DefaultPageRegion: X48MMY65MM
-*PageRegion X48MMY65MM/58mm x 65mm: "<</PageSize[164 182]>>setpagedevice"
-*PageRegion X48MMY105MM/58mm x 105mm: "<</PageSize[164 298]>>setpagedevice"
-*PageRegion X48MMY210MM/58mm x 210mm: "<</PageSize[164 595]>>setpagedevice"
-*PageRegion X48MMY297MM/58mm x 297mm: "<</PageSize[164 842]>>setpagedevice"
-*PageRegion X48MMY3276MM/58mm x 3276mm: "<</PageSize[164 9286]>>setpagedevice"
+*PageRegion X48MMY65MM/48mm x 65mm: "<</PageSize[136 182]>>setpagedevice"
+*PageRegion X48MMY105MM/48mm x 105mm: "<</PageSize[136 298]>>setpagedevice"
+*PageRegion X48MMY210MM/48mm x 210mm: "<</PageSize[136 595]>>setpagedevice"
+*PageRegion X48MMY297MM/48mm x 297mm: "<</PageSize[136 842]>>setpagedevice"
+*PageRegion X48MMY3276MM/48mm x 3276mm: "<</PageSize[136 9286]>>setpagedevice"
 *CloseUI: *PageRegion
 *DefaultImageableArea: X48MMY65MM
-*ImageableArea X48MMY65MM/58mm x 65mm: "14 0 150 182"
-*ImageableArea X48MMY105MM/58mm x 105mm: "14 0 150 298"
-*ImageableArea X48MMY210MM/58mm x 210mm: "14 0 150 595"
-*ImageableArea X48MMY297MM/58mm x 297mm: "14 0 150 842"
-*ImageableArea X48MMY3276MM/58mm x 3276mm: "14 0 150 9286"
+*ImageableArea X48MMY65MM/48mm x 65mm: "0 0 136 182"
+*ImageableArea X48MMY105MM/48mm x 105mm: "0 0 136 298"
+*ImageableArea X48MMY210MM/48mm x 210mm: "0 0 136 595"
+*ImageableArea X48MMY297MM/48mm x 297mm: "0 0 136 842"
+*ImageableArea X48MMY3276MM/48mm x 3276mm: "0 0 136 9286"
 *DefaultPaperDimension: X48MMY65MM
-*PaperDimension X48MMY65MM/58mm x 65mm: "164 182"
-*PaperDimension X48MMY105MM/58mm x 105mm: "164 298"
-*PaperDimension X48MMY210MM/58mm x 210mm: "164 595"
-*PaperDimension X48MMY297MM/58mm x 297mm: "164 842"
-*PaperDimension X48MMY3276MM/58mm x 3276mm: "164 9286"
-*MaxMediaWidth: "164"
+*PaperDimension X48MMY65MM/48mm x 65mm: "136 182"
+*PaperDimension X48MMY105MM/48mm x 105mm: "136 298"
+*PaperDimension X48MMY210MM/48mm x 210mm: "136 595"
+*PaperDimension X48MMY297MM/48mm x 297mm: "136 842"
+*PaperDimension X48MMY3276MM/48mm x 3276mm: "136 9286"
+*MaxMediaWidth: "136"
 *MaxMediaHeight: "9286"
-*HWMargins: 14 0 14 0
+*HWMargins: 0 0 0 0
 *CustomPageSize True: "pop pop pop <</PageSize[5 -2 roll]/ImagingBBox null>>setpagedevice"
-*ParamCustomPageSize Width: 1 points 164 164
+*ParamCustomPageSize Width: 1 points 1 136
 *ParamCustomPageSize Height: 2 points 56 9286
 *ParamCustomPageSize WidthOffset: 3 points 0 0
 *ParamCustomPageSize HeightOffset: 4 points 0 0
@@ -121,6 +121,12 @@
 *BlankSpace True/Print: "<</cupsInteger6 1>>setpagedevice"
 *BlankSpace False/None: "<</cupsInteger6 0>>setpagedevice"
 *CloseUI: *BlankSpace
+*OpenUI *TrimMode/Vertical Trimming: PickOne
+*OrderDependency: 10 AnySetup *TrimMode
+*DefaultTrimMode: Strong
+*TrimMode Strong/Strong (Trim top and bottom): ""
+*TrimMode Off/Off (Print full page height): ""
+*CloseUI: *TrimMode
 *CloseGroup: BlankGroup
 *DefaultFont: Courier
 *% End of cpi58.ppd, 05572 bytes.
