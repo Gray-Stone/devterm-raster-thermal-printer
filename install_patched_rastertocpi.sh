@@ -7,8 +7,16 @@ BUILD_BIN="${SRC_DIR}/rastertocpi"
 
 FILTER_DST="/usr/lib/cups/filter/rastertocpi"
 PPD_SRC="${SRC_DIR}/cpi58.ppd"
-PPD_DST="/etc/cups/ppd/devterm_printer.ppd"
 MODEL_DST="/usr/share/cups/model/clockworkpi/cpi58.ppd"
+
+# Optional queue wiring:
+# - Leave QUEUE_NAME empty (default) to install filter+model only.
+# - Set QUEUE_NAME=<queue> to also install queue PPD + defaults for that queue.
+QUEUE_NAME="${QUEUE_NAME:-}"
+PPD_DST=""
+if [[ -n "${QUEUE_NAME}" ]]; then
+  PPD_DST="/etc/cups/ppd/${QUEUE_NAME}.ppd"
+fi
 
 BACKUP_DIR="/var/backups/tprint-rastertocpi"
 STAMP="$(date +%Y%m%d-%H%M%S)"
@@ -47,23 +55,43 @@ sudo mkdir -p "${BACKUP_DIR}/${STAMP}"
 if [[ -f "${FILTER_DST}" ]]; then
   sudo cp -a "${FILTER_DST}" "${BACKUP_DIR}/${STAMP}/rastertocpi"
 fi
-if sudo test -f "${PPD_DST}"; then
-  sudo cp -a "${PPD_DST}" "${BACKUP_DIR}/${STAMP}/devterm_printer.ppd"
+if [[ -n "${PPD_DST}" ]] && sudo test -f "${PPD_DST}"; then
+  sudo cp -a "${PPD_DST}" "${BACKUP_DIR}/${STAMP}/${QUEUE_NAME}.ppd"
 fi
 
 echo "Installing filter and PPD..."
 sudo install -m 0755 -o root -g root "${BUILD_BIN}" "${FILTER_DST}"
 sudo install -d -m 0755 -o root -g root /usr/share/cups/model/clockworkpi
 sudo install -m 0644 -o root -g root "${PPD_SRC}" "${MODEL_DST}"
-sudo install -m 0644 -o root -g lp "${PPD_SRC}" "${PPD_DST}"
+if [[ -n "${PPD_DST}" ]]; then
+  sudo install -m 0644 -o root -g lp "${PPD_SRC}" "${PPD_DST}"
+fi
 
 echo "Restarting CUPS..."
 sudo systemctl restart cups
 
-echo "Applying queue defaults for stable spacing..."
-lpoptions -p devterm_printer -o FeedWhere=None -o BlankSpace=False -o TrimMode=Strong || true
-if command -v lpadmin >/dev/null 2>&1; then
-  sudo lpadmin -p devterm_printer -o FeedWhere=None -o BlankSpace=False -o TrimMode=Strong
+if [[ -n "${QUEUE_NAME}" ]]; then
+  if lpstat -p "${QUEUE_NAME}" >/dev/null 2>&1; then
+    echo "Applying queue defaults for stable spacing on ${QUEUE_NAME}..."
+    lpoptions -p "${QUEUE_NAME}" \
+      -o FeedWhere=None \
+      -o BlankSpace=False \
+      -o TrimMode=Strong \
+      -o orientation-requested=3 \
+      -o print-scaling=none || true
+    if command -v lpadmin >/dev/null 2>&1; then
+      sudo lpadmin -p "${QUEUE_NAME}" \
+        -o FeedWhere=None \
+        -o BlankSpace=False \
+        -o TrimMode=Strong \
+        -o orientation-requested-default=3 \
+        -o print-scaling-default=none || true
+    fi
+  else
+    echo "Skipping queue defaults: queue '${QUEUE_NAME}' not found."
+  fi
+else
+  echo "QUEUE_NAME not set: skipped queue PPD install/defaults."
 fi
 
 echo "Done. Backups: ${BACKUP_DIR}/${STAMP}"
